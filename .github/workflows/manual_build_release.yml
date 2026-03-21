@@ -57,7 +57,7 @@ jobs:
           rm composer.json
           rm composer.lock
           cd  ..
-          zip -r "${{ github.event.repository.name }}.zip" wp-webauthn -x ".github/*" "*/.github/*" ".gitignore" "*/.gitignore" ".vscode/*" "*/.vscode/*" ".git/*" "*/.git/*"
+          zip -r "${{ github.event.repository.name }}.zip" wp-webauthn -x ".github/*" "*/.github/*" ".gitignore" "*/.gitignore" ".vscode/*" "*/.vscode/*" ".git/*" "*/.git/*" "*/composer.json" "*/composer.lock"
           mv "${{ github.event.repository.name }}.zip" ${{ github.workspace }} 
 
       - name: Create Release and Upload Asset
