@@ -381,9 +381,17 @@ function check() {
                             if (data === 'true') {
                                 wwa_dom('wp-webauthn-notice', (dom) => { dom.innerHTML = php_vars.i18n_6 }, 'class');
                                 if (document.querySelectorAll('p.submit input[name="redirect_to"]').length > 0) {
-                                    setTimeout(() => {
-                                        window.location.href = document.querySelectorAll('p.submit input[name="redirect_to"]')[0].value;
-                                    }, 200);
+                                    const rawRedirectFromInput = document.querySelectorAll('p.submit input[name="redirect_to"]')[0].value;
+                                    const safeRedirectFromInput = sanitizeRedirectUrl(rawRedirectFromInput);
+                                    if (safeRedirectFromInput) {
+                                        setTimeout(() => {
+                                            window.location.href = safeRedirectFromInput;
+                                        }, 200);
+                                    } else {
+                                        setTimeout(() => {
+                                            window.location.href = php_vars.admin_url
+                                        }, 200);
+                                    }
                                 } else {
                                     const rawRedirect = getQueryString('redirect_to');
                                     const safeRedirect = sanitizeRedirectUrl(rawRedirect);
