@@ -37,7 +37,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer update --prefer-dist --no-progress --no-dev --optimize-autoloader
+          composer require thecodingmachine/safe:"3.4.0 as 1.1.0" --no-update
+          composer update thecodingmachine/safe --with-dependencies --prefer-dist --no-progress --no-dev --optimize-autoloader
+          composer install --prefer-dist --no-progress --no-dev --optimize-autoloader
 
       - name: Create plugin ZIP
         run: |
