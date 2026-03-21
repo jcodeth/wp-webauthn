@@ -1,5 +1,27 @@
 'use strict';
 
+/**
+ * Validate a URL string and ensure it is safe to navigate to.
+ * Returns the absolute URL if it is same-origin as the current page, otherwise null.
+ *
+ * @param {string} urlStr
+ * @returns {string|null}
+ */
+const wwa_get_safe_redirect_url = function (urlStr) {
+    if (!urlStr) {
+        return null;
+    }
+    try {
+        const url = new URL(urlStr, window.location.href);
+        if (url.origin === window.location.origin) {
+            return url.href;
+        }
+    } catch (e) {
+        // Ignore malformed URLs
+    }
+    return null;
+};
+
 // Send an AJAX request and get the response
 const wwa_ajax = function () {
     let xmlHttpReq = new XMLHttpRequest();
@@ -243,12 +265,24 @@ function wwa_auth() {
                             button_dom.parentNode.previousElementSibling.innerHTML = wwa_php_vars.i18n_6;
                             if (document.querySelectorAll('p.login-submit input[name="redirect_to"]').length > 0) {
                                 setTimeout(() => {
-                                    window.location.href = document.querySelectorAll('p.login-submit input[name="redirect_to"]')[0].value;
+                                    const redirectInputValue = document.querySelectorAll('p.login-submit input[name="redirect_to"]')[0].value;
+                                    const safeUrl = wwa_get_safe_redirect_url(redirectInputValue);
+                                    if (safeUrl) {
+                                        window.location.href = safeUrl;
+                                    } else {
+                                        window.location.reload();
+                                    }
                                 }, 200);
                             } else {
                                 if (document.getElementsByClassName('wwa-redirect-to').length > 0) {
                                     setTimeout(() => {
-                                        window.location.href = document.getElementsByClassName('wwa-redirect-to')[0].value;
+                                        const redirectInputValue = document.getElementsByClassName('wwa-redirect-to')[0].value;
+                                        const safeUrl = wwa_get_safe_redirect_url(redirectInputValue);
+                                        if (safeUrl) {
+                                            window.location.href = safeUrl;
+                                        } else {
+                                            window.location.reload();
+                                        }
                                     }, 200);
                                 } else {
                                     setTimeout(() => {
