@@ -10,7 +10,7 @@
         "vendor-dir": "wp-webauthn-vendor"
     },
     "require": {
-        "web-auth/webauthn-lib": "^4.9",
+        "web-auth/webauthn-lib": "^3.3.12",
         "nyholm/psr7-server": "^1.0",
         "nyholm/psr7": "^1.6",
         "web-token/jwt-library": "^4.1.3",
