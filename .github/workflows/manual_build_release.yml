@@ -1,0 +1,69 @@
+name: Manual Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'tag name (ex. v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: |
+          composer update --prefer-dist --no-progress --no-dev --optimize-autoloader
+
+      - name: Create plugin ZIP
+        run: |
+          rm -rf .wordpress-org
+          rm -rf gutenberg-src
+          rm -rf README
+          rm -rf node_modules
+          rm -rf .github
+          rm -rf .git
+          rm -rf .vscode
+          rm .gitattributes
+          rm .gitignore
+          rm .distignore
+          rm README.md
+          rm composer.json
+          rm composer.lock
+          cd  ..
+          zip -r "${{ github.event.repository.name }}.zip" ${{ github.workspace }} 
+          mv "${{ github.event.repository.name }}.zip" ${{ github.workspace }} 
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag_name }}
+          name: Release ${{ github.event.inputs.tag_name }}
+          draft: true
+          prerelease: true
+          files: ${{ github.event.repository.name }}.zip
+          generate_release_notes: true
