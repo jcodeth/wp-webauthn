@@ -192,6 +192,27 @@ function getQueryString(name) {
     }
 }
 
+function sanitizeRedirectUrl(rawRedirect) {
+    if (!rawRedirect) {
+        return null;
+    }
+
+    try {
+        // Use the current origin as base to correctly resolve relative URLs.
+        const url = new URL(rawRedirect, window.location.origin);
+
+        // Only allow redirects that stay on the same origin.
+        if (url.origin === window.location.origin) {
+            return url.href;
+        }
+    } catch (e) {
+        // If URL construction fails, treat as unsafe.
+        return null;
+    }
+
+    return null;
+}
+
 function toggle() {
     if (document.querySelectorAll('#lostpasswordform, #registerform, .admin-email-confirm-form, #resetpassform').length > 0) {
         return;
@@ -364,9 +385,11 @@ function check() {
                                         window.location.href = document.querySelectorAll('p.submit input[name="redirect_to"]')[0].value;
                                     }, 200);
                                 } else {
-                                    if (getQueryString('redirect_to')) {
+                                    const rawRedirect = getQueryString('redirect_to');
+                                    const safeRedirect = sanitizeRedirectUrl(rawRedirect);
+                                    if (safeRedirect) {
                                         setTimeout(() => {
-                                            window.location.href = getQueryString('redirect_to');
+                                            window.location.href = safeRedirect;
                                         }, 200);
                                     } else {
                                         setTimeout(() => {
